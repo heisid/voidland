@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.kucing_oren.voidland.logic.AppSettings;
 import com.kucing_oren.voidland.logic.SettingsRepository;
+import com.kucing_oren.voidland.screens.EmulatorScreen;
 import com.kucing_oren.voidland.screens.InitialScreen;
 import com.kucing_oren.voidland.screens.MainScreen;
 import com.kucing_oren.voidland.screens.SettingsScreen;
@@ -46,7 +47,7 @@ public class VoidLand extends ApplicationAdapter {
     }
 
     public void showMainScreen() {
-        showScreen(new MainScreen(this));
+        showScreen(new EmulatorScreen(this));
     }
 
     public void showSettingsScreen(boolean returnToMainScreen) {
