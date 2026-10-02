@@ -17,7 +17,6 @@ import com.kucing_oren.voidland.logic.AppSettings;
 import com.kucing_oren.voidland.logic.SettingsRepository;
 import com.kucing_oren.voidland.screens.EmulatorScreen;
 import com.kucing_oren.voidland.screens.InitialScreen;
-import com.kucing_oren.voidland.screens.MainScreen;
 import com.kucing_oren.voidland.screens.SettingsScreen;
 
 public class VoidLand extends ApplicationAdapter {
