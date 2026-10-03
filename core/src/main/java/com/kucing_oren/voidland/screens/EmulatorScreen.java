@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kucing_oren.voidland.VoidLand;
+import com.kucing_oren.voidland.emulator.Chip8;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -39,7 +40,9 @@ public class EmulatorScreen extends ScreenAdapter {
     private float gridX;
     private float gridY;
 
-    public EmulatorScreen(VoidLand application) {
+    private final Chip8 chip8;
+
+    public EmulatorScreen(VoidLand application, Chip8 chip8) {
         this.uiScale = application.getSettings().uiScale;
         this.stage = new Stage(new ScreenViewport());
         this.shapeRenderer = new ShapeRenderer();
@@ -85,6 +88,8 @@ public class EmulatorScreen extends ScreenAdapter {
             }
         });
         controls.add(beepButton).expandX().fillX().height(50f * uiScale).padLeft(8f * uiScale);
+
+        this.chip8 = chip8;
     }
 
     @Override

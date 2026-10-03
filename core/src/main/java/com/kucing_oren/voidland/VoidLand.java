@@ -2,22 +2,24 @@ package com.kucing_oren.voidland;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.kucing_oren.voidland.logic.AppSettings;
-import com.kucing_oren.voidland.logic.SettingsRepository;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.kucing_oren.voidland.emulator.Chip8;
 import com.kucing_oren.voidland.screens.EmulatorScreen;
 import com.kucing_oren.voidland.screens.InitialScreen;
 import com.kucing_oren.voidland.screens.SettingsScreen;
+import com.kucing_oren.voidland.settings.AppSettings;
+import com.kucing_oren.voidland.settings.SettingsRepository;
+import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 
 public class VoidLand extends ApplicationAdapter {
     private AppSettings settings;
@@ -26,6 +28,12 @@ public class VoidLand extends ApplicationAdapter {
     private BitmapFont font;
     private Texture whiteTexture;
     private Screen currentScreen;
+
+    private Chip8 chip8;
+
+    public VoidLand(NativeFileChooser fileChooser) {
+        chip8 = new Chip8(fileChooser);
+    }
 
     @Override
     public void create() {
@@ -42,11 +50,11 @@ public class VoidLand extends ApplicationAdapter {
     }
 
     public void showInitialScreen() {
-        showScreen(new InitialScreen(this));
+        showScreen(new InitialScreen(this, chip8));
     }
 
     public void showMainScreen() {
-        showScreen(new EmulatorScreen(this));
+        showScreen(new EmulatorScreen(this, chip8));
     }
 
     public void showSettingsScreen(boolean returnToMainScreen) {

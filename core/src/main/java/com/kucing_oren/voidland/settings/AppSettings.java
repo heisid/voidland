@@ -1,4 +1,4 @@
-package com.kucing_oren.voidland.logic;
+package com.kucing_oren.voidland.settings;
 
 public class AppSettings {
     public boolean soundEnabled = true;

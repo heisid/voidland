@@ -1,4 +1,4 @@
-package com.kucing_oren.voidland.logic;
+package com.kucing_oren.voidland.settings;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;

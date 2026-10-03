@@ -1,7 +1,7 @@
 package com.kucing_oren.voidland.screens;
 
 import com.kucing_oren.voidland.VoidLand;
-import com.kucing_oren.voidland.logic.AppSettings;
+import com.kucing_oren.voidland.settings.AppSettings;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 
 public class SettingsScreen extends AbstractMenuScreen {

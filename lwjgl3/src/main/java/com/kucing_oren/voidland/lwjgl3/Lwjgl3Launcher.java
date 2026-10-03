@@ -4,15 +4,21 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.kucing_oren.voidland.VoidLand;
 
+import java.util.Locale;
+
 /** Launches the desktop (LWJGL3) application. */
 public class Lwjgl3Launcher {
     public static void main(String[] args) {
         if (StartupHelper.startNewJvmIfRequired()) return; // This handles macOS support and helps on Windows.
+        if (System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("linux")
+            && System.getProperty("org.lwjgl.nfd.linux.portal") == null) {
+            System.setProperty("org.lwjgl.nfd.linux.portal", "true");
+        }
         createApplication();
     }
 
     private static Lwjgl3Application createApplication() {
-        return new Lwjgl3Application(new VoidLand(), getDefaultConfiguration());
+        return new Lwjgl3Application(new VoidLand(new Lwjgl3FileChooser()), getDefaultConfiguration());
     }
 
     private static Lwjgl3ApplicationConfiguration getDefaultConfiguration() {
