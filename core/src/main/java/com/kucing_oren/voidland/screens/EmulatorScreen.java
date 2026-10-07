@@ -106,8 +106,8 @@ public class EmulatorScreen extends ScreenAdapter {
             for (int i = 0; i < displayBuffer.length; i++) {
                 for (int j = 0; j < displayBuffer[i].length; j++) {
                     if (displayBuffer[i][j]) {
-                        float x = gridX + j * pixelSize;
-                        float y = gridY + (GRID_ROWS - 1 - i) * pixelSize;
+                        float x = gridX + i * pixelSize;
+                        float y = gridY + (GRID_ROWS - 1 - j) * pixelSize;
                         shapeRenderer.rect(x, y, pixelSize, pixelSize);
                     }
                 }

@@ -43,7 +43,10 @@ public class Chip8 {
                     return;
                 }
                 try {
-                    memory.load(program);
+                    memory.wipe();
+                    memory.load(program, 0x200);
+                    displayDriver.clear();
+                    cpu.reset();
                 } catch (IllegalArgumentException e) {
                     Gdx.app.error("Chip8", "Failed to load program: " + file.path(), e);
                 }

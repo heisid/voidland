@@ -1,5 +1,6 @@
 package com.kucing_oren.voidland.emulator;
 
+import java.util.Arrays;
 import java.util.Random;
 
 public class Cpu {
@@ -14,10 +15,30 @@ public class Cpu {
     private static final byte STACK_SIZE = 16;
     private final short[] stackMemory;
 
+    private static final int[] FONT = {
+        0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+        0x20, 0x60, 0x20, 0x20, 0x70, // 1
+        0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+        0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+        0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+        0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+        0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+        0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+        0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+        0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+        0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+        0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+        0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+        0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+        0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+        0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+    };
+
     private short opcode;
 
     public Cpu(Memory memory, DisplayDriver displayDriver) {
         this.memory = memory;
+        loadFont();
         this.displayDriver = displayDriver;
 
         vRegister = new byte[16];
@@ -27,6 +48,21 @@ public class Cpu {
         stackPointer = 0x0;
     }
 
+    public void reset() {
+        Arrays.fill(vRegister, (byte) 0);
+        indexRegister = 0;
+        programCounter = 0x200;
+        stackPointer = 0x0;
+    }
+
+    private void loadFont() {
+        byte[] fontByte = new byte[FONT.length];
+        for (int i = 0; i < FONT.length; i++) {
+            fontByte[i] = (byte) (FONT[i] & 0xFF);
+        }
+        memory.load(fontByte, 0x50);
+    }
+
     public void tick() {
         fetch();
         execute();
@@ -34,7 +70,7 @@ public class Cpu {
 
     private void fetch() {
         short opcodeLeft = (short) (memory.getByte(programCounter) << 8);
-        short opcodeRight = memory.getByte((short) (programCounter + 1));
+        short opcodeRight = (short) (memory.getByte((short) (programCounter + 1)) & 0xFF);
         opcode = (short) (opcodeLeft | opcodeRight);
         programCounter += 2;
     }
@@ -54,8 +90,8 @@ public class Cpu {
                     displayDriver.clear();
                 } else if ((kk & 0xFF) == 0xEE) {
                     // RET
-                    programCounter = stackMemory[stackPointer];
                     stackPointer--;
+                    programCounter = stackMemory[stackPointer];
                 }
                 break;
             case 0x1:
@@ -115,30 +151,35 @@ public class Cpu {
                     case 0x4:
                         // ADDC Vx, Vy
                         int sum = (vRegister[x] & 0xFF) + (vRegister[y] & 0xFF);
-                        vRegister[0xF] = (byte) (sum > 0xFF ? 1 : 0);
+                        byte flagAddCarry = (byte) (sum > 0xFF ? 1 : 0);
                         vRegister[x] = (byte) sum;
+                        vRegister[0xF] = flagAddCarry;
                         break;
                     case 0x5:
                         // SUBB Vx, Vy
                         int subtrxy = (vRegister[x] & 0xFF) - (vRegister[y] & 0xFF);
-                        vRegister[0xF] = (byte) (vRegister[x] > vRegister[y] ? 1 : 0);
+                        byte flagSubBorrowXy = (byte) ((vRegister[x] & 0xFF) >= (vRegister[y] & 0xFF) ? 1 : 0);
                         vRegister[x] = (byte) subtrxy;
+                        vRegister[0xF] = flagSubBorrowXy;
                         break;
                     case 0x6:
                         // SHR Vx
-                        vRegister[0xF] = (byte) ((vRegister[x] & 0x01) == 1 ? 1 : 0);
-                        vRegister[x] = (byte) (vRegister[x] >> 1);
+                        byte flagShr = (byte) ((vRegister[x] & 0x01) == 1 ? 1 : 0);
+                        vRegister[x] = (byte) ((vRegister[x] & 0xFF) >> 1);
+                        vRegister[0xF] = flagShr;
                         break;
                     case 0x7:
                         // SUBB Vy, Vx
                         int subtryx = (vRegister[y] & 0xFF) - (vRegister[x] & 0xFF);
-                        vRegister[0xF] = (byte) (vRegister[y] > vRegister[x] ? 1 : 0);
+                        byte flagSubBorrowYx = (byte) ((vRegister[y] & 0xFF) >= (vRegister[x] & 0xFF) ? 1 : 0);
                         vRegister[x] = (byte) subtryx;
+                        vRegister[0xF] = flagSubBorrowYx;
                         break;
                     case 0x8:
                         // SHL Vx
-                        vRegister[0xF] = (byte) ((vRegister[x] & 0x80) >> 7 == 1 ? 1 : 0);
+                        byte flagShl = (byte) ((vRegister[x] & 0x80) >> 7 == 1 ? 1 : 0);
                         vRegister[x] = (byte) (vRegister[x] << 1);
+                        vRegister[0xF] = flagShl;
                         break;
                     default:
                         break;
@@ -154,30 +195,30 @@ public class Cpu {
                 break;
             case 0xB:
                 // JP V0, nnn
-                programCounter = (short) (nnn + vRegister[0]);
+                programCounter = (short) (nnn + (vRegister[0] & 0xFF));
                 break;
             case 0xC:
                 // RND Vx, kk
                 Random random = new Random();
-                byte rndByte = (byte) random.nextInt(127);
+                byte rndByte = (byte) random.nextInt(256);
                 vRegister[x] = (byte) (rndByte & kk);
                 break;
             case 0xD:
                 // DRW Vx, Vy, k
                 short addr = indexRegister;
+                byte flag = 0;
                 for (int rowIdx = 0; rowIdx < k; rowIdx++) {
                     byte rowData = memory.getByte(addr);
                     for (int colIdx = 0; colIdx < 8; colIdx++) {
-                        boolean oldPixel = displayDriver.get(vRegister[x] + rowIdx, vRegister[y] + colIdx);
+                        boolean oldPixel = displayDriver.get((vRegister[x] & 0xFF) + colIdx, (vRegister[y] & 0xFF) + rowIdx);
                         if (oldPixel && getBit(colIdx, rowData)) {
-                            vRegister[0xF] = 1;
-                        } else {
-                            vRegister[0xF] = 0;
+                            flag = 1;
                         }
-                        displayDriver.set(vRegister[x] + rowIdx, vRegister[y] + colIdx, oldPixel ^ getBit(colIdx, rowData));
+                        displayDriver.set((vRegister[x] & 0xFF) + colIdx, (vRegister[y] & 0xFF) + rowIdx, oldPixel ^ getBit(colIdx, rowData));
                     }
                     addr++;
                 }
+                vRegister[0xF] = flag;
                 break;
             case 0xE:
                 // todo
@@ -197,7 +238,7 @@ public class Cpu {
                         // todo
                         break;
                     case 0x1E:
-                        indexRegister += vRegister[x];
+                        indexRegister = (short) (indexRegister + (vRegister[x] & 0xFF));
                         break;
                 }
                 break;
@@ -207,6 +248,7 @@ public class Cpu {
     }
 
     private boolean getBit(int pos, byte byteVal) {
-        return ((byteVal >> pos) & 1) == 1;
+        // MSB first
+        return ((byteVal >> (7 - pos)) & 1) == 1;
     }
 }
