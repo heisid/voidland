@@ -12,11 +12,14 @@ import java.util.Locale;
 public class Chip8 {
     private Cpu cpu;
     private final Memory memory;
+    private final DisplayDriver displayDriver;
     private final NativeFileChooser fileChooser;
 
     public Chip8(NativeFileChooser fileChooser) {
         this.fileChooser = fileChooser;
-        this.memory = new Memory();
+        memory = new Memory();
+        displayDriver = new DisplayDriver();
+        cpu = new Cpu(memory, displayDriver);
     }
 
     public void selectProgram() {
@@ -47,9 +50,7 @@ public class Chip8 {
             }
 
             @Override
-            public void onCancellation() {
-                // The user cancelled the file selection.
-            }
+            public void onCancellation() {}
 
             @Override
             public void onError(Exception exception) {
