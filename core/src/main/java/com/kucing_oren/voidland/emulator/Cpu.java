@@ -4,7 +4,7 @@ import java.util.Random;
 
 public class Cpu {
     private Memory memory;
-    private DisplayDriver displayBuffer;
+    private DisplayDriver displayDriver;
 
     private byte[] vRegister;
     private short indexRegister;
@@ -16,9 +16,9 @@ public class Cpu {
 
     private short opcode;
 
-    public Cpu(Memory memory, DisplayDriver displayBuffer) {
+    public Cpu(Memory memory, DisplayDriver displayDriver) {
         this.memory = memory;
-        this.displayBuffer = displayBuffer;
+        this.displayDriver = displayDriver;
 
         vRegister = new byte[0xF];
         indexRegister = 0;
@@ -46,7 +46,7 @@ public class Cpu {
             case 0x0:
                 if ((kk & 0xFF) == 0xE0) {
                     // CLS
-                    displayBuffer.clear();
+                    displayDriver.clear();
                 } else if ((kk & 0xFF) == 0xEE) {
                     // RET
                     programCounter = stackMemory[stackPointer];
@@ -159,9 +159,29 @@ public class Cpu {
                 break;
             case 0xD:
                 // DRW Vx, Vy, k
-
+                short addr = indexRegister;
+                for (int rowIdx = 0; rowIdx < k; rowIdx++) {
+                    byte rowData = memory.getByte(addr);
+                    for (int colIdx = 0; colIdx < 8; colIdx++) {
+                        int drawX = vRegister[x] + rowIdx;
+                        int drawY = vRegister[y] + colIdx;
+                        boolean oldPixel = displayDriver.get(drawX, drawY);
+                        if (oldPixel && getBit(colIdx, rowData)) {
+                            vRegister[0xF] = 1;
+                        } else {
+                            vRegister[0xF] = 0;
+                        }
+                        displayDriver.set(drawX, drawY, oldPixel ^ getBit(colIdx, rowData));
+                    }
+                    addr++;
+                }
+                break;
             default:
                 break;
         }
+    }
+
+    private boolean getBit(int pos, byte byteVal) {
+        return ((byteVal >> pos) & 1) == 1;
     }
 }

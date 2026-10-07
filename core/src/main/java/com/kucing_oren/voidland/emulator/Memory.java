@@ -16,4 +16,8 @@ public class Memory {
 
         System.arraycopy(src, 0, content, 0, src.length);
     }
+
+    public byte getByte(short address) {
+        return content[address];
+    }
 }

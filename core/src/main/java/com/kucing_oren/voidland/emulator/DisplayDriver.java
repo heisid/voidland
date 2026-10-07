@@ -33,4 +33,8 @@ public class DisplayDriver {
             }
         }
     }
+
+    public boolean get(int x, int y) {
+        return displayBuffer[y][x];
+    }
 }
