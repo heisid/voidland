@@ -14,7 +14,7 @@ public class Memory {
                 "Failed to load memory, source exceed max size of " + MAX_SIZE + "bytes");
         }
 
-        System.arraycopy(src, 0, content, 0, src.length);
+        System.arraycopy(src, 0, content, 0x200, src.length);
     }
 
     public byte getByte(short address) {

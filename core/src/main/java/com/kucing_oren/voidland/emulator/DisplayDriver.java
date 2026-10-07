@@ -11,7 +11,9 @@ public class DisplayDriver {
     }
 
     public void set(int x, int y, boolean value) {
-        displayBuffer[y][x] = value;
+        int wrapX = x % DISPLAY_WIDTH;
+        int wrapY = y % DISPLAY_HEIGHT;
+        displayBuffer[wrapY][wrapX] = value;
     }
 
     public void toggle(int x, int y) {
@@ -35,6 +37,7 @@ public class DisplayDriver {
     }
 
     public boolean get(int x, int y) {
+//        if (x >= DISPLAY_WIDTH || y >= DISPLAY_HEIGHT) return false;
         return displayBuffer[y][x];
     }
 

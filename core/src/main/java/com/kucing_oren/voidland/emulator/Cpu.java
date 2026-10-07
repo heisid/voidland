@@ -11,7 +11,7 @@ public class Cpu {
     private short programCounter;
     private byte stackPointer;
 
-    private static final byte STACK_SIZE = 0xF;
+    private static final byte STACK_SIZE = 16;
     private final short[] stackMemory;
 
     private short opcode;
@@ -20,7 +20,7 @@ public class Cpu {
         this.memory = memory;
         this.displayDriver = displayDriver;
 
-        vRegister = new byte[0xF];
+        vRegister = new byte[16];
         indexRegister = 0;
         programCounter = 0x200;
         stackMemory = new short[STACK_SIZE];
@@ -36,6 +36,7 @@ public class Cpu {
         short opcodeLeft = (short) (memory.getByte(programCounter) << 8);
         short opcodeRight = memory.getByte((short) (programCounter + 1));
         opcode = (short) (opcodeLeft | opcodeRight);
+        programCounter += 2;
     }
 
     private void execute() {
@@ -167,17 +168,37 @@ public class Cpu {
                 for (int rowIdx = 0; rowIdx < k; rowIdx++) {
                     byte rowData = memory.getByte(addr);
                     for (int colIdx = 0; colIdx < 8; colIdx++) {
-                        int drawX = vRegister[x] + rowIdx;
-                        int drawY = vRegister[y] + colIdx;
-                        boolean oldPixel = displayDriver.get(drawX, drawY);
+                        boolean oldPixel = displayDriver.get(vRegister[x] + rowIdx, vRegister[y] + colIdx);
                         if (oldPixel && getBit(colIdx, rowData)) {
                             vRegister[0xF] = 1;
                         } else {
                             vRegister[0xF] = 0;
                         }
-                        displayDriver.set(drawX, drawY, oldPixel ^ getBit(colIdx, rowData));
+                        displayDriver.set(vRegister[x] + rowIdx, vRegister[y] + colIdx, oldPixel ^ getBit(colIdx, rowData));
                     }
                     addr++;
+                }
+                break;
+            case 0xE:
+                // todo
+                break;
+            case 0xF:
+                switch (kk) {
+                    case 0x07:
+                        //todo
+                        break;
+                    case 0x0A:
+                        // todo
+                        break;
+                    case 0x15:
+                        // todo
+                        break;
+                    case 0x18:
+                        // todo
+                        break;
+                    case 0x1E:
+                        indexRegister += vRegister[x];
+                        break;
                 }
                 break;
             default:
