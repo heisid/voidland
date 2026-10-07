@@ -58,4 +58,12 @@ public class Chip8 {
             }
         });
     }
+
+    public void cpuTick() {
+        cpu.tick();
+    }
+
+    public boolean[][] getDisplayBuffer() {
+        return this.displayDriver.getBuffer();
+    }
 }

@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kucing_oren.voidland.VoidLand;
 import com.kucing_oren.voidland.emulator.Chip8;
+import com.kucing_oren.voidland.emulator.DisplayDriver;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,7 +33,6 @@ public class EmulatorScreen extends ScreenAdapter {
     private final TextButton pauseButton;
     private boolean paused;
 
-    private final boolean[][] pixels;
     private static final int GRID_ROWS = 32;
     private static final int GRID_COLUMNS = 64;
     private static final float CONTROL_GAP = 16f;
@@ -46,8 +46,6 @@ public class EmulatorScreen extends ScreenAdapter {
         this.uiScale = application.getSettings().uiScale;
         this.stage = new Stage(new ScreenViewport());
         this.shapeRenderer = new ShapeRenderer();
-
-        this.pixels = new boolean[GRID_ROWS][GRID_COLUMNS];
 
         Table root = new Table();
         root.setFillParent(true);
@@ -95,16 +93,19 @@ public class EmulatorScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
         ScreenUtils.clear(Color.BLACK);
-        updatePixels();
+        if (!paused) {
+            chip8.cpuTick();
+        }
+        boolean[][] displayBuffer = chip8.getDisplayBuffer();
         stage.act(delta);
 
         if (pixelSize > 0f) {
             shapeRenderer.setProjectionMatrix(stage.getCamera().combined);
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
             shapeRenderer.setColor(Color.WHITE);
-            for (int i = 0; i < pixels.length; i++) {
-                for (int j = 0; j < pixels[i].length; j++) {
-                    if (pixels[i][j]) {
+            for (int i = 0; i < displayBuffer.length; i++) {
+                for (int j = 0; j < displayBuffer[i].length; j++) {
+                    if (displayBuffer[i][j]) {
                         float x = gridX + j * pixelSize;
                         float y = gridY + (GRID_ROWS - 1 - i) * pixelSize;
                         shapeRenderer.rect(x, y, pixelSize, pixelSize);
@@ -114,19 +115,6 @@ public class EmulatorScreen extends ScreenAdapter {
             shapeRenderer.end();
         }
         stage.draw();
-    }
-
-    private void updatePixels() {
-        if (paused) {
-            return;
-        }
-
-        for (int i = 0; i < pixels.length; i++) {
-            for (int j = 0; j < pixels[i].length; j++) {
-                double random = Math.random();
-                pixels[i][j] = random < 0.5;
-            }
-        }
     }
 
     @Override

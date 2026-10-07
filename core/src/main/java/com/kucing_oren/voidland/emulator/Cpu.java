@@ -3,16 +3,16 @@ package com.kucing_oren.voidland.emulator;
 import java.util.Random;
 
 public class Cpu {
-    private Memory memory;
-    private DisplayDriver displayDriver;
+    private final Memory memory;
+    private final DisplayDriver displayDriver;
 
-    private byte[] vRegister;
+    private final byte[] vRegister;
     private short indexRegister;
     private short programCounter;
     private byte stackPointer;
 
     private static final byte STACK_SIZE = 0xF;
-    private short[] stackMemory;
+    private final short[] stackMemory;
 
     private short opcode;
 
@@ -32,7 +32,11 @@ public class Cpu {
         execute();
     }
 
-    private void fetch() {}
+    private void fetch() {
+        short opcodeLeft = (short) (memory.getByte(programCounter) << 8);
+        short opcodeRight = memory.getByte((short) (programCounter + 1));
+        opcode = (short) (opcodeLeft | opcodeRight);
+    }
 
     private void execute() {
         byte prefix = (byte) ((opcode & 0xF000) >> 12);
