@@ -1,18 +1,15 @@
 package com.kucing_oren.voidland.emulator;
 
 public class DisplayDriver {
-    public static final int DISPLAY_WIDTH = 64;
-    public static final int DISPLAY_HEIGHT = 32;
-
     private final boolean[][] displayBuffer;
 
     public DisplayDriver() {
-        displayBuffer = new boolean[DISPLAY_WIDTH][DISPLAY_HEIGHT];
+        displayBuffer = new boolean[Chip8Constants.DISPLAY_WIDTH][Chip8Constants.DISPLAY_HEIGHT];
     }
 
     public void set(int x, int y, boolean value) {
-        int wrapX = x % DISPLAY_WIDTH;
-        int wrapY = y % DISPLAY_HEIGHT;
+        int wrapX = x % Chip8Constants.DISPLAY_WIDTH;
+        int wrapY = y % Chip8Constants.DISPLAY_HEIGHT;
         displayBuffer[wrapX][wrapY] = value;
     }
 
@@ -29,16 +26,16 @@ public class DisplayDriver {
     }
 
     public void clear() {
-        for (int x = 0; x < DISPLAY_WIDTH; x++) {
-            for (int y = 0; y < DISPLAY_HEIGHT; y++) {
+        for (int x = 0; x < Chip8Constants.DISPLAY_WIDTH; x++) {
+            for (int y = 0; y < Chip8Constants.DISPLAY_HEIGHT; y++) {
                 unset(x, y);
             }
         }
     }
 
     public boolean get(int x, int y) {
-        int wrapX = x % DISPLAY_WIDTH;
-        int wrapY = y % DISPLAY_HEIGHT;
+        int wrapX = x % Chip8Constants.DISPLAY_WIDTH;
+        int wrapY = y % Chip8Constants.DISPLAY_HEIGHT;
         return displayBuffer[wrapX][wrapY];
     }
 

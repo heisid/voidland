@@ -12,7 +12,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kucing_oren.voidland.VoidLand;
 import com.kucing_oren.voidland.emulator.Chip8;
-import com.kucing_oren.voidland.emulator.DisplayDriver;
+import com.kucing_oren.voidland.emulator.Chip8Constants;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -33,8 +33,6 @@ public class EmulatorScreen extends ScreenAdapter {
     private final TextButton pauseButton;
     private boolean paused;
 
-    private static final int GRID_ROWS = 32;
-    private static final int GRID_COLUMNS = 64;
     private static final float CONTROL_GAP = 16f;
     private float pixelSize;
     private float gridX;
@@ -107,7 +105,7 @@ public class EmulatorScreen extends ScreenAdapter {
                 for (int j = 0; j < displayBuffer[i].length; j++) {
                     if (displayBuffer[i][j]) {
                         float x = gridX + i * pixelSize;
-                        float y = gridY + (GRID_ROWS - 1 - j) * pixelSize;
+                        float y = gridY + (Chip8Constants.DISPLAY_HEIGHT - 1 - j) * pixelSize;
                         shapeRenderer.rect(x, y, pixelSize, pixelSize);
                     }
                 }
@@ -165,9 +163,12 @@ public class EmulatorScreen extends ScreenAdapter {
         float availableWidth = Math.max(0f, width - 2f * padding);
         float availableHeight = Math.max(0f, height - 2f * padding - controlHeight - controlGap);
 
-        pixelSize = Math.min(availableWidth / GRID_COLUMNS, availableHeight / GRID_ROWS);
-        float gridWidth = GRID_COLUMNS * pixelSize;
-        float gridHeight = GRID_ROWS * pixelSize;
+        pixelSize = Math.min(
+            availableWidth / Chip8Constants.DISPLAY_WIDTH,
+            availableHeight / Chip8Constants.DISPLAY_HEIGHT
+        );
+        float gridWidth = Chip8Constants.DISPLAY_WIDTH * pixelSize;
+        float gridHeight = Chip8Constants.DISPLAY_HEIGHT * pixelSize;
         gridX = (width - gridWidth) / 2f;
         gridY = padding + controlHeight + controlGap + (availableHeight - gridHeight) / 2f;
     }

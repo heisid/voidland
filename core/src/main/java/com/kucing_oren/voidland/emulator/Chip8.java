@@ -48,7 +48,7 @@ public class Chip8 {
                 }
                 try {
                     memory.wipe();
-                    memory.load(program, 0x200);
+                    memory.load(program, Chip8Constants.PROGRAM_START_ADDRESS);
                     displayDriver.clear();
                     cpu.reset();
                     loadedProgramName = file.name();

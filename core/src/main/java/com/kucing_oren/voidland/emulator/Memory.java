@@ -3,17 +3,16 @@ package com.kucing_oren.voidland.emulator;
 import java.util.Arrays;
 
 public class Memory {
-    private static final int MAX_SIZE = 4096;
     private final byte[] content;
 
     public Memory() {
-        content = new byte[MAX_SIZE];
+        content = new byte[Chip8Constants.MEMORY_SIZE];
     }
 
     public void load(byte[] src, int startPos) {
-        if (src.length > MAX_SIZE) {
+        if (src.length > Chip8Constants.MEMORY_SIZE) {
             throw new IllegalArgumentException(
-                "Failed to load memory, source exceed max size of " + MAX_SIZE + "bytes");
+                "Failed to load memory, source exceed max size of " + Chip8Constants.MEMORY_SIZE + "bytes");
         }
 
         System.arraycopy(src, 0, content, startPos, src.length);

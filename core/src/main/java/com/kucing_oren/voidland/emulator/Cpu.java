@@ -14,7 +14,6 @@ public class Cpu {
     private short programCounter;
     private byte stackPointer;
 
-    private static final byte STACK_SIZE = 16;
     private final short[] stackMemory;
 
     private static final int[] FONT = {
@@ -36,8 +35,6 @@ public class Cpu {
         0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     };
 
-    private static final int FONT_START_ADDR = 0x50;
-
     private short opcode;
 
     private byte delayTimer;
@@ -50,10 +47,10 @@ public class Cpu {
         this.keyboardDriver = keyboardDriver;
         soundDriver = new SoundDriver();
 
-        vRegister = new byte[16];
+        vRegister = new byte[Chip8Constants.REGISTER_COUNT];
         indexRegister = 0;
-        programCounter = 0x200;
-        stackMemory = new short[STACK_SIZE];
+        programCounter = Chip8Constants.PROGRAM_START_ADDRESS;
+        stackMemory = new short[Chip8Constants.STACK_SIZE];
         stackPointer = 0x0;
 
         delayTimer = 0;
@@ -63,7 +60,7 @@ public class Cpu {
     public void reset() {
         Arrays.fill(vRegister, (byte) 0);
         indexRegister = 0;
-        programCounter = 0x200;
+        programCounter = Chip8Constants.PROGRAM_START_ADDRESS;
         stackPointer = 0x0;
     }
 
@@ -80,7 +77,7 @@ public class Cpu {
         for (int i = 0; i < FONT.length; i++) {
             fontByte[i] = (byte) (FONT[i] & 0xFF);
         }
-        memory.load(fontByte, FONT_START_ADDR);
+        memory.load(fontByte, Chip8Constants.FONT_START_ADDRESS);
     }
 
     public void tick() {
@@ -230,7 +227,7 @@ public class Cpu {
                 byte flag = 0;
                 for (int rowIdx = 0; rowIdx < k; rowIdx++) {
                     byte rowData = memory.getByte(addr);
-                    for (int colIdx = 0; colIdx < 8; colIdx++) {
+                    for (int colIdx = 0; colIdx < Chip8Constants.SPRITE_WIDTH; colIdx++) {
                         boolean oldPixel = displayDriver.get((vRegister[x] & 0xFF) + colIdx, (vRegister[y] & 0xFF) + rowIdx);
                         if (oldPixel && getBit(colIdx, rowData)) {
                             flag = 1;
@@ -310,8 +307,8 @@ public class Cpu {
     }
 
     private short getFontAddress(byte font) {
-        int offset = (font & 0xFF) * 5; // 5 bytes each font
-        return (short) (FONT_START_ADDR + offset);
+        int offset = (font & 0xFF) * Chip8Constants.FONT_BYTES_PER_CHARACTER;
+        return (short) (Chip8Constants.FONT_START_ADDRESS + offset);
     }
 
     private void saveBcd(int value) {
