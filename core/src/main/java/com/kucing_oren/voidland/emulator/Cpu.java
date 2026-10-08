@@ -259,8 +259,8 @@ public class Cpu {
             case 0xE:
                 boolean skipIfPressed = (kk & 0xFF) == 0x9E; // SKP Vx
                 boolean skipIfNotPressed = (kk & 0xFF) == 0xA1; // SKNP Vx
-                if ((skipIfPressed && keyboardDriver.iskeyPressed(vRegister[x]))
-                    || (skipIfNotPressed && !keyboardDriver.iskeyPressed(vRegister[x]))) {
+                if ((skipIfPressed && keyboardDriver.isKeyPressed(vRegister[x]))
+                    || (skipIfNotPressed && !keyboardDriver.isKeyPressed(vRegister[x]))) {
                     programCounter += 2;
                 }
                 break;

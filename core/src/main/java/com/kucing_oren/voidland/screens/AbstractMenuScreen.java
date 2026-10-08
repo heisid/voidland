@@ -5,6 +5,7 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -32,7 +33,11 @@ abstract class AbstractMenuScreen extends ScreenAdapter {
         root.add(heading).padBottom(22f * uiScale).row();
 
         content = new Table();
-        root.add(content).expand().fill();
+        ScrollPane scrollPane = new ScrollPane(content, new ScrollPane.ScrollPaneStyle());
+        scrollPane.setScrollingDisabled(true, false);
+        scrollPane.setFadeScrollBars(false);
+        scrollPane.setOverscroll(false, false);
+        root.add(scrollPane).expand().fill();
     }
 
     protected TextButton addButton(String text, Runnable action) {
@@ -48,12 +53,17 @@ abstract class AbstractMenuScreen extends ScreenAdapter {
         return button;
     }
 
-    protected Label addMessage(String text) {
+    protected Label addMessage(String text, float fontScale) {
         Label label = new Label(text, application.getSkin());
         label.setColor(Color.LIGHT_GRAY);
         label.setWrap(true);
+        label.setFontScale(fontScale);
         content.add(label).width(360f * uiScale).pad(8f * uiScale).row();
         return label;
+    }
+
+    protected Label addMessage(String text) {
+        return addMessage(text, 1.0f);
     }
 
     protected void addGap() {

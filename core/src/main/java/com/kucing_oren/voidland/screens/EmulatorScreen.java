@@ -1,7 +1,7 @@
 package com.kucing_oren.voidland.screens;
 
-import com.badlogic.gdx.*;
-import com.badlogic.gdx.audio.AudioDevice;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -18,8 +18,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class EmulatorScreen extends ScreenAdapter {
-    private static final int BEEP_SAMPLE_RATE = 22050;
-    private static final int BEEP_DURATION_MILLIS = 120;
     private final ShapeRenderer shapeRenderer;
     private final float uiScale;
     private final Stage stage;
@@ -28,7 +26,6 @@ public class EmulatorScreen extends ScreenAdapter {
         thread.setDaemon(true);
         return thread;
     });
-    private final short[] beepSamples = createBeepSamples();
 
     private final TextButton pauseButton;
     private boolean paused;
@@ -75,15 +72,6 @@ public class EmulatorScreen extends ScreenAdapter {
             }
         });
         controls.add(exitButton).expandX().fillX().height(50f * uiScale).padLeft(8f * uiScale);
-        TextButton beepButton = new TextButton("Beep", application.getSkin());
-        beepButton.pad(10f * uiScale);
-        beepButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
-                playBeep();
-            }
-        });
-        controls.add(beepButton).expandX().fillX().height(50f * uiScale).padLeft(8f * uiScale);
 
         this.chip8 = chip8;
     }
@@ -131,29 +119,6 @@ public class EmulatorScreen extends ScreenAdapter {
         stage.dispose();
         shapeRenderer.dispose();
         audioExecutor.shutdown();
-    }
-
-    private void playBeep() {
-        audioExecutor.execute(() -> {
-            AudioDevice audioDevice = Gdx.audio.newAudioDevice(BEEP_SAMPLE_RATE, true);
-            try {
-                audioDevice.writeSamples(beepSamples, 0, beepSamples.length);
-            } finally {
-                audioDevice.dispose();
-            }
-        });
-    }
-
-    private static short[] createBeepSamples() {
-        int sampleCount = BEEP_SAMPLE_RATE * BEEP_DURATION_MILLIS / 1000;
-        short[] samples = new short[sampleCount];
-        for (int i = 0; i < sampleCount; i++) {
-            double progress = (double) i / sampleCount;
-            double envelope = Math.min(1.0, Math.min(progress * 20.0, (1.0 - progress) * 20.0));
-            double tone = Math.sin(2.0 * Math.PI * 660.0 * i / BEEP_SAMPLE_RATE);
-            samples[i] = (short) (tone * envelope * Short.MAX_VALUE * 0.3);
-        }
-        return samples;
     }
 
     private void updateGridLayout(int width, int height) {

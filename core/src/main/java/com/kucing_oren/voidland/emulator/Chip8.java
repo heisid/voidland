@@ -11,7 +11,7 @@ import java.util.Locale;
 import java.util.function.Consumer;
 
 public class Chip8 {
-    private Cpu cpu;
+    private final Cpu cpu;
     private final Memory memory;
     private final DisplayDriver displayDriver;
     private final KeyboardDriver keyboardDriver;
@@ -24,6 +24,10 @@ public class Chip8 {
         displayDriver = new DisplayDriver();
         keyboardDriver = new KeyboardDriver();
         cpu = new Cpu(memory, displayDriver, keyboardDriver);
+    }
+
+    public void setKeyBindings(int[] keyBindings) {
+        keyboardDriver.setKeyBindings(keyBindings);
     }
 
     public void selectProgram(Consumer<String> onProgramLoaded) {

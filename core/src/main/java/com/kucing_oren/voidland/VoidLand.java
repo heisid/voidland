@@ -39,6 +39,7 @@ public class VoidLand extends ApplicationAdapter {
     public void create() {
         settingsRepository = new SettingsRepository();
         settings = settingsRepository.load();
+        chip8.setKeyBindings(settings.chip8KeyBindings);
         Pixmap pixel = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixel.setColor(Color.WHITE);
         pixel.fill();
@@ -65,6 +66,7 @@ public class VoidLand extends ApplicationAdapter {
     public void saveSettings(AppSettings updatedSettings) {
         settingsRepository.save(updatedSettings);
         settings = updatedSettings;
+        chip8.setKeyBindings(settings.chip8KeyBindings);
         applyUiScale();
     }
 
