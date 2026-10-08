@@ -13,10 +13,6 @@ public class DisplayDriver {
         displayBuffer[wrapX][wrapY] = value;
     }
 
-    public void toggle(int x, int y) {
-        displayBuffer[x][y] = !displayBuffer[x][y];
-    }
-
     public void set(int x, int y) {
         set(x, y, true);
     }

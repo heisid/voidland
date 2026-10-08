@@ -63,11 +63,24 @@ public class EmulatorScreen extends ScreenAdapter {
             }
         });
         controls.add(pauseButton).expandX().fillX().height(50f * uiScale).padRight(8f * uiScale);
+
+        TextButton reloadButton = new TextButton("Reset Program", application.getSkin());
+        reloadButton.pad(10f * uiScale);
+        reloadButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                chip8.restart();
+            }
+        });
+        controls.add(reloadButton).expandX().fillX().height(50f * uiScale).padLeft(8f * uiScale);
+
         TextButton exitButton = new TextButton("Exit to main menu", application.getSkin());
         exitButton.pad(10f * uiScale);
         exitButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, com.badlogic.gdx.scenes.scene2d.Actor actor) {
+                chip8.restart();
+                paused = true;
                 application.showInitialScreen();
             }
         });

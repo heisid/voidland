@@ -11,7 +11,7 @@ public class InitialScreen extends AbstractMenuScreen {
     private TextButton startEmulatorButton;
 
     public InitialScreen(VoidLand application, Chip8 chip8) {
-        super(application, "Pathetic CHIP-8 Emulator");
+        super(application, "Void Land");
         Label loadedProgram = addMessage(getLoadedProgramMessage(chip8));
         addButton("Load Program", () -> chip8.selectProgram(programName -> {
             loadedProgram.setText("Loaded ROM: " + programName);
@@ -20,9 +20,8 @@ public class InitialScreen extends AbstractMenuScreen {
         startEmulatorButton = addButton("Start Emulator", application::showMainScreen);
         updateStartButton(startEmulatorButton, chip8.hasLoadedProgram());
         addButton("Settings", () -> application.showSettingsScreen(false));
-        Label message = addMessage("");
-        addButton("Help", () -> message.setText("Help content is a placeholder."));
-        addButton("About", () -> message.setText("About information is a placeholder."));
+        addGap();
+        addButton("About", application::showAboutScreen);
         addButton("Exit", Gdx.app::exit);
     }
 

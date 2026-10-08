@@ -17,6 +17,7 @@ public class Chip8 {
     private final KeyboardDriver keyboardDriver;
     private final NativeFileChooser fileChooser;
     private String loadedProgramName;
+    private byte[] program;
 
     public Chip8(NativeFileChooser fileChooser) {
         this.fileChooser = fileChooser;
@@ -61,7 +62,6 @@ public class Chip8 {
                     Gdx.app.error("Chip8", "Selected program must have a .ch8 extension: " + file.name());
                     return;
                 }
-                byte[] program;
                 try {
                     program = file.readBytes();
                 } catch (GdxRuntimeException e) {
@@ -88,6 +88,13 @@ public class Chip8 {
                 Gdx.app.error("Chip8", "Failed to select a program", exception);
             }
         });
+    }
+
+    public void restart() {
+        memory.wipe();
+        memory.load(program, Chip8Constants.PROGRAM_START_ADDRESS);
+        displayDriver.clear();
+        cpu.reset();
     }
 
     public boolean hasLoadedProgram() {
