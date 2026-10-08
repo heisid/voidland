@@ -35,4 +35,11 @@ public class KeyboardDriver {
         }
         return isPressed;
     }
+
+    public Byte getKeyPressed() {
+        for (Map.Entry<Integer, Integer> entry : keyMap.entrySet()) {
+            if (Gdx.input.isKeyPressed(entry.getKey())) return (byte) (entry.getValue() & 0xFF);
+        }
+        return null;
+    }
 }

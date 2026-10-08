@@ -7,6 +7,7 @@ public class Cpu {
     private final Memory memory;
     private final DisplayDriver displayDriver;
     private final KeyboardDriver keyboardDriver;
+    private final SoundDriver soundDriver;
 
     private final byte[] vRegister;
     private short indexRegister;
@@ -37,17 +38,24 @@ public class Cpu {
 
     private short opcode;
 
+    private byte delayTimer;
+    private byte soundTimer;
+
     public Cpu(Memory memory, DisplayDriver displayDriver, KeyboardDriver keyboardDriver) {
         this.memory = memory;
         loadFont();
         this.displayDriver = displayDriver;
         this.keyboardDriver = keyboardDriver;
+        soundDriver = new SoundDriver();
 
         vRegister = new byte[16];
         indexRegister = 0;
         programCounter = 0x200;
         stackMemory = new short[STACK_SIZE];
         stackPointer = 0x0;
+
+        delayTimer = 0;
+        soundTimer = 0;
     }
 
     public void reset() {
@@ -68,6 +76,7 @@ public class Cpu {
     public void tick() {
         fetch();
         execute();
+        updateTimers();
     }
 
     private void fetch() {
@@ -233,24 +242,51 @@ public class Cpu {
             case 0xF:
                 switch (kk) {
                     case 0x07:
-                        //todo
+                        // LD Vx, DT
+                        vRegister[x] = delayTimer;
                         break;
                     case 0x0A:
-                        // todo
+                        // LD Vx, K
+                        vRegister[x] = waitKeypress();
                         break;
                     case 0x15:
-                        // todo
+                        // LD DT, Vx
+                        delayTimer = vRegister[x];
                         break;
                     case 0x18:
-                        // todo
+                        // LD ST, Vx
+                        soundTimer = vRegister[x];
+                        if ((soundTimer & 0xFF) > 0) soundDriver.play();
                         break;
                     case 0x1E:
                         indexRegister = (short) (indexRegister + (vRegister[x] & 0xFF));
+                        break;
+                    default:
                         break;
                 }
                 break;
             default:
                 break;
+        }
+    }
+
+    private byte waitKeypress() {
+        Byte keyPress = null;
+        while (keyPress == null) {
+            keyPress = keyboardDriver.getKeyPressed();
+        }
+        return keyPress;
+    }
+
+    private void updateTimers() {
+        if ((delayTimer & 0xFF) > 0) {
+            delayTimer = (byte) ((delayTimer & 0xFF) - 1);
+        }
+        if ((soundTimer & 0xFF) > 0) {
+            soundTimer = (byte) ((soundTimer & 0xFF) - 1);
+        }
+        if (soundTimer == 0) {
+            soundDriver.stop();
         }
     }
 
