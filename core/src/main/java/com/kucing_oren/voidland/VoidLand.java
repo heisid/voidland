@@ -45,6 +45,7 @@ public class VoidLand extends ApplicationAdapter {
         whiteTexture = new Texture(pixel);
         pixel.dispose();
         createSkin();
+        chip8.loadSound();
         applyUiScale();
         showInitialScreen();
     }
@@ -138,6 +139,7 @@ public class VoidLand extends ApplicationAdapter {
             currentScreen.hide();
             currentScreen.dispose();
         }
+        chip8.dispose();
         skin.dispose();
     }
 }

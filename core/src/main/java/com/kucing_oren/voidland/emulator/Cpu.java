@@ -67,6 +67,14 @@ public class Cpu {
         stackPointer = 0x0;
     }
 
+    public void loadSound() {
+        soundDriver.loadSound();
+    }
+
+    public void dispose() {
+        soundDriver.dispose();
+    }
+
     private void loadFont() {
         byte[] fontByte = new byte[FONT.length];
         for (int i = 0; i < FONT.length; i++) {

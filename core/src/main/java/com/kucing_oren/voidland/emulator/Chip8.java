@@ -76,8 +76,16 @@ public class Chip8 {
         return loadedProgramName;
     }
 
+    public void loadSound() {
+        cpu.loadSound();
+    }
+
     public void cpuTick() {
         cpu.tick();
+    }
+
+    public void dispose() {
+        cpu.dispose();
     }
 
     public boolean[][] getDisplayBuffer() {
