@@ -47,6 +47,7 @@ public class Cpu {
     private double instructionElapsedTime;
     private double timerElapsedTime;
     private boolean waitingForKey;
+    private boolean waitingForKeyRelease;
     private byte waitingRegister;
     private boolean resetVfOnLogic = true;
     private boolean incrementIndexOnLoadStore = true;
@@ -76,6 +77,7 @@ public class Cpu {
         instructionElapsedTime = 0.0;
         timerElapsedTime = 0.0;
         waitingForKey = false;
+        waitingForKeyRelease = false;
         waitingForDisplay = false;
         displayWaitElapsedTime = 0.0;
     }
@@ -91,6 +93,7 @@ public class Cpu {
         instructionElapsedTime = 0.0;
         timerElapsedTime = 0.0;
         waitingForKey = false;
+        waitingForKeyRelease = false;
         waitingForDisplay = false;
         displayWaitElapsedTime = 0.0;
         soundDriver.stop();
@@ -145,9 +148,14 @@ public class Cpu {
                 }
             } else if (waitingForKey) {
                 Byte keyPress = keyboardDriver.getKeyPressed();
-                if (keyPress != null) {
+                if (waitingForKeyRelease) {
+                    if (keyPress == null) {
+                        waitingForKey = false;
+                        waitingForKeyRelease = false;
+                    }
+                } else if (keyPress != null) {
                     vRegister[waitingRegister] = keyPress;
-                    waitingForKey = false;
+                    waitingForKeyRelease = true;
                 }
             } else {
                 fetch();
@@ -322,13 +330,9 @@ public class Cpu {
                         break;
                     case 0x0A:
                         // LD Vx, K
-                        Byte keyPress = keyboardDriver.getKeyPressed();
-                        if (keyPress == null) {
-                            waitingForKey = true;
-                            waitingRegister = x;
-                        } else {
-                            vRegister[x] = keyPress;
-                        }
+                        waitingForKey = true;
+                        waitingForKeyRelease = false;
+                        waitingRegister = x;
                         break;
                     case 0x15:
                         // LD DT, Vx
