@@ -16,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.kucing_oren.voidland.emulator.Chip8;
 import com.kucing_oren.voidland.screens.EmulatorScreen;
 import com.kucing_oren.voidland.screens.InitialScreen;
+import com.kucing_oren.voidland.screens.KeyboardSettingsScreen;
 import com.kucing_oren.voidland.screens.SettingsScreen;
 import com.kucing_oren.voidland.settings.AppSettings;
 import com.kucing_oren.voidland.settings.SettingsRepository;
@@ -39,6 +40,7 @@ public class VoidLand extends ApplicationAdapter {
     public void create() {
         settingsRepository = new SettingsRepository();
         settings = settingsRepository.load();
+        chip8.setKeyBindings(settings.keyBindings);
         Pixmap pixel = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixel.setColor(Color.WHITE);
         pixel.fill();
@@ -61,9 +63,18 @@ public class VoidLand extends ApplicationAdapter {
         showScreen(new SettingsScreen(this, returnToMainScreen));
     }
 
+    public void showSettingsScreen(boolean returnToMainScreen, AppSettings settingsToEdit) {
+        showScreen(new SettingsScreen(this, returnToMainScreen, settingsToEdit));
+    }
+
+    public void showKeyboardSettingsScreen(boolean returnToMainScreen, AppSettings settingsToEdit) {
+        showScreen(new KeyboardSettingsScreen(this, returnToMainScreen, settingsToEdit));
+    }
+
     public void saveSettings(AppSettings updatedSettings) {
         settingsRepository.save(updatedSettings);
         settings = updatedSettings;
+        chip8.setKeyBindings(settings.keyBindings);
         applyUiScale();
     }
 

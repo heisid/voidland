@@ -76,6 +76,10 @@ public class Chip8 {
         return loadedProgramName;
     }
 
+    public void setKeyBindings(int[] keyBindings) {
+        keyboardDriver.setKeyBindings(keyBindings);
+    }
+
     public void cpuTick() {
         cpu.tick();
     }

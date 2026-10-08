@@ -9,9 +9,13 @@ public class SettingsScreen extends AbstractMenuScreen {
     private final AppSettings editedSettings;
 
     public SettingsScreen(VoidLand application, boolean returnToMainScreen) {
+        this(application, returnToMainScreen, application.getSettings());
+    }
+
+    public SettingsScreen(VoidLand application, boolean returnToMainScreen, AppSettings settingsToEdit) {
         super(application, "Settings");
         this.returnToMainScreen = returnToMainScreen;
-        this.editedSettings = application.getSettings().copy();
+        this.editedSettings = settingsToEdit.copy();
         addMessage("Changes are applied when you save.");
 
         TextButton soundButton = addButton("", () -> {
@@ -22,6 +26,8 @@ public class SettingsScreen extends AbstractMenuScreen {
             editedSettings.cycleUiScale();
             updateLabels();
         });
+        addButton("Configure keyboard", () ->
+            application.showKeyboardSettingsScreen(returnToMainScreen, editedSettings));
         addGap();
         addButton("Save settings", () -> {
             application.saveSettings(editedSettings);
