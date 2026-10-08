@@ -58,6 +58,7 @@ public class Cpu {
     }
 
     public void reset() {
+        loadFont();
         Arrays.fill(vRegister, (byte) 0);
         indexRegister = 0;
         programCounter = Chip8Constants.PROGRAM_START_ADDRESS;
@@ -146,7 +147,7 @@ public class Cpu {
                 break;
             case 0x7:
                 // ADD Vx, byte
-                vRegister[x] += kk;
+                vRegister[x] = (byte) ((vRegister[x] & 0xFF) + (kk & 0xFF));
                 break;
             case 0x8:
                 switch (k) {
@@ -254,7 +255,7 @@ public class Cpu {
                         break;
                     case 0x1E:
                         // ADD I, Vx
-                        indexRegister = (short) (indexRegister + (vRegister[x] & 0xFF));
+                        indexRegister = (short) ((indexRegister & 0xFF) + (vRegister[x] & 0xFF));
                         break;
                     case 0x29:
                         // LD F, Vx
@@ -313,7 +314,7 @@ public class Cpu {
     }
 
     private short getFontAddress(byte font) {
-        int offset = (font & 0xFF) * Chip8Constants.FONT_BYTES_PER_CHARACTER;
+        int offset = (font & 0x0F) * Chip8Constants.FONT_BYTES_PER_CHARACTER;
         return (short) (Chip8Constants.FONT_START_ADDRESS + offset);
     }
 
