@@ -6,6 +6,7 @@ import java.util.Random;
 public class Cpu {
     private final Memory memory;
     private final DisplayDriver displayDriver;
+    private final KeyboardDriver keyboardDriver;
 
     private final byte[] vRegister;
     private short indexRegister;
@@ -36,10 +37,11 @@ public class Cpu {
 
     private short opcode;
 
-    public Cpu(Memory memory, DisplayDriver displayDriver) {
+    public Cpu(Memory memory, DisplayDriver displayDriver, KeyboardDriver keyboardDriver) {
         this.memory = memory;
         loadFont();
         this.displayDriver = displayDriver;
+        this.keyboardDriver = keyboardDriver;
 
         vRegister = new byte[16];
         indexRegister = 0;
@@ -221,7 +223,12 @@ public class Cpu {
                 vRegister[0xF] = flag;
                 break;
             case 0xE:
-                // todo
+                boolean skipIfPressed = (kk & 0xFF) == 0x9E; // SKP Vx
+                boolean skipIfNotPressed = (kk & 0xFF) == 0xA1; // SKNP Vx
+                if ((skipIfPressed && keyboardDriver.iskeyPressed(vRegister[x]))
+                    || (skipIfNotPressed && !keyboardDriver.iskeyPressed(vRegister[x]))) {
+                    programCounter += 2;
+                }
                 break;
             case 0xF:
                 switch (kk) {

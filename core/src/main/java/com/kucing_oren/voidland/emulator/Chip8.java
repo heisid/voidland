@@ -14,6 +14,7 @@ public class Chip8 {
     private Cpu cpu;
     private final Memory memory;
     private final DisplayDriver displayDriver;
+    private final KeyboardDriver keyboardDriver;
     private final NativeFileChooser fileChooser;
     private String loadedProgramName;
 
@@ -21,7 +22,8 @@ public class Chip8 {
         this.fileChooser = fileChooser;
         memory = new Memory();
         displayDriver = new DisplayDriver();
-        cpu = new Cpu(memory, displayDriver);
+        keyboardDriver = new KeyboardDriver();
+        cpu = new Cpu(memory, displayDriver, keyboardDriver);
     }
 
     public void selectProgram(Consumer<String> onProgramLoaded) {
