@@ -223,20 +223,7 @@ public class Cpu {
                 break;
             case 0xD:
                 // DRW Vx, Vy, k
-                short addr = indexRegister;
-                byte flag = 0;
-                for (int rowIdx = 0; rowIdx < k; rowIdx++) {
-                    byte rowData = memory.getByte(addr);
-                    for (int colIdx = 0; colIdx < Chip8Constants.SPRITE_WIDTH; colIdx++) {
-                        boolean oldPixel = displayDriver.get((vRegister[x] & 0xFF) + colIdx, (vRegister[y] & 0xFF) + rowIdx);
-                        if (oldPixel && getBit(colIdx, rowData)) {
-                            flag = 1;
-                        }
-                        displayDriver.set((vRegister[x] & 0xFF) + colIdx, (vRegister[y] & 0xFF) + rowIdx, oldPixel ^ getBit(colIdx, rowData));
-                    }
-                    addr++;
-                }
-                vRegister[0xF] = flag;
+                drawSprite(x, y, k);
                 break;
             case 0xE:
                 boolean skipIfPressed = (kk & 0xFF) == 0x9E; // SKP Vx
@@ -277,6 +264,8 @@ public class Cpu {
                         // LD B, Vx
                         saveBcd(vRegister[x]);
                         break;
+                    case 0x55:
+
                     default:
                         break;
                 }
@@ -284,6 +273,23 @@ public class Cpu {
             default:
                 break;
         }
+    }
+
+    private void drawSprite(byte x, byte y, byte k) {
+        short addr = indexRegister;
+        byte flag = 0;
+        for (int rowIdx = 0; rowIdx < k; rowIdx++) {
+            byte rowData = memory.getByte(addr);
+            for (int colIdx = 0; colIdx < Chip8Constants.SPRITE_WIDTH; colIdx++) {
+                boolean oldPixel = displayDriver.get((vRegister[x] & 0xFF) + colIdx, (vRegister[y] & 0xFF) + rowIdx);
+                if (oldPixel && getBit(colIdx, rowData)) {
+                    flag = 1;
+                }
+                displayDriver.set((vRegister[x] & 0xFF) + colIdx, (vRegister[y] & 0xFF) + rowIdx, oldPixel ^ getBit(colIdx, rowData));
+            }
+            addr++;
+        }
+        vRegister[0xF] = flag;
     }
 
     private byte waitKeypress() {
