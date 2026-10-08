@@ -6,7 +6,7 @@ public final class Chip8Constants {
     public static final int DISPLAY_HEIGHT = 32;
     public static final int REGISTER_COUNT = 16;
     public static final int STACK_SIZE = 16;
-    public static final int CPU_FREQUENCY_HZ = 1000;
+    public static final int CPU_FREQUENCY_HZ = 10000;
     public static final int TIMER_FREQUENCY_HZ = 60;
     public static final int PROGRAM_START_ADDRESS = 0x200;
     public static final int FONT_START_ADDRESS = 0x50;

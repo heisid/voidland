@@ -30,6 +30,24 @@ public class Chip8 {
         keyboardDriver.setKeyBindings(keyBindings);
     }
 
+    public void setQuirks(
+        boolean resetVfOnLogic,
+        boolean incrementIndexOnLoadStore,
+        boolean displayWait,
+        boolean clipSprites,
+        boolean shiftUsesVx,
+        boolean jumpUsesVx
+    ) {
+        cpu.setQuirks(
+            resetVfOnLogic,
+            incrementIndexOnLoadStore,
+            displayWait,
+            clipSprites,
+            shiftUsesVx,
+            jumpUsesVx
+        );
+    }
+
     public void selectProgram(Consumer<String> onProgramLoaded) {
         NativeFileChooserConfiguration configuration = new NativeFileChooserConfiguration();
         configuration.title = "Select CHIP-8 program";

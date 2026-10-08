@@ -11,6 +11,7 @@ public class SoundDriver {
         if (sine != null) return;
         Music music = Gdx.audio.newMusic(Gdx.files.internal("sounds/sine-200hz.mp3"));
         music.setLooping(true);
+        music.setVolume(2.0f);
         sine = music;
     }
 

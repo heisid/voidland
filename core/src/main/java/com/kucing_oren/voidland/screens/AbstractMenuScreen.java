@@ -1,14 +1,17 @@
 package com.kucing_oren.voidland.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kucing_oren.voidland.VoidLand;
 
@@ -17,6 +20,8 @@ abstract class AbstractMenuScreen extends ScreenAdapter {
     protected final Stage stage;
     protected final Table content;
     protected final float uiScale;
+    private final ScrollPane scrollPane;
+    private final Label scrollHint;
 
     AbstractMenuScreen(VoidLand application, String title) {
         this.application = application;
@@ -33,11 +38,20 @@ abstract class AbstractMenuScreen extends ScreenAdapter {
         root.add(heading).padBottom(22f * uiScale).row();
 
         content = new Table();
-        ScrollPane scrollPane = new ScrollPane(content, new ScrollPane.ScrollPaneStyle());
+        content.top();
+        scrollPane = new ScrollPane(content, new ScrollPane.ScrollPaneStyle());
         scrollPane.setScrollingDisabled(true, false);
         scrollPane.setFadeScrollBars(false);
         scrollPane.setOverscroll(false, false);
+        scrollPane.setFlickScroll(true);
+        scrollPane.setCancelTouchFocus(true);
         root.add(scrollPane).expand().fill();
+        root.row();
+
+        scrollHint = new Label("", application.getSkin());
+        scrollHint.setColor(Color.LIGHT_GRAY);
+        root.add(scrollHint).height(24f * uiScale).padTop(4f * uiScale);
+        updateScrollHint();
     }
 
     protected TextButton addButton(String text, Runnable action) {
@@ -72,14 +86,55 @@ abstract class AbstractMenuScreen extends ScreenAdapter {
 
     @Override
     public void show() {
-        Gdx.input.setInputProcessor(stage);
+        restoreInputProcessor();
+    }
+
+    protected final void restoreInputProcessor() {
+        Gdx.input.setInputProcessor(new InputMultiplexer(new InputAdapter() {
+            private final Vector2 pointer = new Vector2();
+
+            @Override
+            public boolean scrolled(float amountX, float amountY) {
+                pointer.set(Gdx.input.getX(), Gdx.input.getY());
+                stage.getViewport().unproject(pointer);
+                Vector2 panePosition = scrollPane.localToStageCoordinates(new Vector2());
+                boolean pointerOverPane = pointer.x >= panePosition.x
+                    && pointer.x <= panePosition.x + scrollPane.getWidth()
+                    && pointer.y >= panePosition.y
+                    && pointer.y <= panePosition.y + scrollPane.getHeight();
+                if (!pointerOverPane || scrollPane.getMaxY() <= 0f) {
+                    return false;
+                }
+                scrollPane.setScrollY(scrollPane.getScrollY() + amountY * 40f * uiScale);
+                return true;
+            }
+        }, stage));
     }
 
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0.08f, 0.1f, 0.14f, 1f);
         stage.act(delta);
+        updateScrollHint();
         stage.draw();
+    }
+
+    private void updateScrollHint() {
+        scrollPane.validate();
+        float maxScroll = scrollPane.getMaxY();
+        if (maxScroll <= 0f) {
+            scrollHint.setText("");
+            scrollHint.setVisible(false);
+        } else {
+            scrollHint.setVisible(true);
+            if (scrollPane.getScrollY() <= 0f) {
+                scrollHint.setText("Scroll down to see more");
+            } else if (scrollPane.getScrollY() >= maxScroll) {
+                scrollHint.setText("Scroll up to see more");
+            } else {
+                scrollHint.setText("Scroll up or down to navigate");
+            }
+        }
     }
 
     @Override

@@ -16,6 +16,7 @@ public class SettingsScreen extends AbstractMenuScreen {
     private final boolean returnToMainScreen;
     private final AppSettings editedSettings;
     private final TextButton[] keyBindingButtons = new TextButton[Chip8Constants.REGISTER_COUNT];
+    private final TextButton[] quirkButtons = new TextButton[6];
     private final Label keyBindingMessage;
     private int capturingKey = -1;
 
@@ -32,6 +33,32 @@ public class SettingsScreen extends AbstractMenuScreen {
         TextButton scaleButton = addButton("", () -> {
             editedSettings.cycleUiScale();
             updateLabels();
+        });
+
+        addMessage("CHIP-8 compatibility quirks:");
+        quirkButtons[0] = addButton("", () -> {
+            editedSettings.resetVfOnLogic = !editedSettings.resetVfOnLogic;
+            updateQuirkLabels();
+        });
+        quirkButtons[1] = addButton("", () -> {
+            editedSettings.incrementIndexOnLoadStore = !editedSettings.incrementIndexOnLoadStore;
+            updateQuirkLabels();
+        });
+        quirkButtons[2] = addButton("", () -> {
+            editedSettings.displayWait = !editedSettings.displayWait;
+            updateQuirkLabels();
+        });
+        quirkButtons[3] = addButton("", () -> {
+            editedSettings.clipSprites = !editedSettings.clipSprites;
+            updateQuirkLabels();
+        });
+        quirkButtons[4] = addButton("", () -> {
+            editedSettings.shiftUsesVx = !editedSettings.shiftUsesVx;
+            updateQuirkLabels();
+        });
+        quirkButtons[5] = addButton("", () -> {
+            editedSettings.jumpUsesVx = !editedSettings.jumpUsesVx;
+            updateQuirkLabels();
         });
 
         addMessage("CHIP-8 key bindings (select a key, then press a keyboard key):");
@@ -64,6 +91,7 @@ public class SettingsScreen extends AbstractMenuScreen {
         });
         addButton("Cancel", this::returnToPreviousScreen);
         updateLabels(soundButton, scaleButton);
+        updateQuirkLabels();
         updateKeyBindingLabels();
     }
 
@@ -85,6 +113,19 @@ public class SettingsScreen extends AbstractMenuScreen {
         scaleButton.setText(scaleLabel());
     }
 
+    private void updateQuirkLabels() {
+        quirkButtons[0].setText(toggleLabel("Reset VF on logic ops", editedSettings.resetVfOnLogic));
+        quirkButtons[1].setText(toggleLabel("Fx55/Fx65 increment I", editedSettings.incrementIndexOnLoadStore));
+        quirkButtons[2].setText(toggleLabel("Wait after drawing", editedSettings.displayWait));
+        quirkButtons[3].setText(toggleLabel("Clip at screen edges", editedSettings.clipSprites));
+        quirkButtons[4].setText(toggleLabel("Shift source: Vx", editedSettings.shiftUsesVx));
+        quirkButtons[5].setText(toggleLabel("Jump offset: Vx", editedSettings.jumpUsesVx));
+    }
+
+    private String toggleLabel(String name, boolean enabled) {
+        return name + ": " + (enabled ? "On" : "Off");
+    }
+
     private void beginKeyCapture(int chip8Key) {
         capturingKey = chip8Key;
         keyBindingMessage.setText("Press a key for CHIP-8 " + Integer.toHexString(chip8Key).toUpperCase()
@@ -98,7 +139,7 @@ public class SettingsScreen extends AbstractMenuScreen {
                     assignKey(capturingKey, keycode);
                 }
                 capturingKey = -1;
-                Gdx.input.setInputProcessor(stage);
+                restoreInputProcessor();
                 return true;
             }
         });

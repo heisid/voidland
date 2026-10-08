@@ -11,12 +11,24 @@ public class AppSettings {
     public boolean soundEnabled = true;
     public float uiScale = 1f;
     public int[] chip8KeyBindings = KeyboardDriver.defaultKeyBindings();
+    public boolean resetVfOnLogic = true;
+    public boolean incrementIndexOnLoadStore = true;
+    public boolean displayWait = true;
+    public boolean clipSprites = true;
+    public boolean shiftUsesVx;
+    public boolean jumpUsesVx;
 
     public AppSettings copy() {
         AppSettings copy = new AppSettings();
         copy.soundEnabled = soundEnabled;
         copy.uiScale = uiScale;
         copy.chip8KeyBindings = chip8KeyBindings.clone();
+        copy.resetVfOnLogic = resetVfOnLogic;
+        copy.incrementIndexOnLoadStore = incrementIndexOnLoadStore;
+        copy.displayWait = displayWait;
+        copy.clipSprites = clipSprites;
+        copy.shiftUsesVx = shiftUsesVx;
+        copy.jumpUsesVx = jumpUsesVx;
         return copy;
     }
 

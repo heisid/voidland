@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Random;
 
 public class Cpu {
+    private static final double DISPLAY_REFRESH_PERIOD = 1.0 / Chip8Constants.TIMER_FREQUENCY_HZ;
+
     private final Memory memory;
     private final DisplayDriver displayDriver;
     private final KeyboardDriver keyboardDriver;
@@ -46,6 +48,14 @@ public class Cpu {
     private double timerElapsedTime;
     private boolean waitingForKey;
     private byte waitingRegister;
+    private boolean resetVfOnLogic = true;
+    private boolean incrementIndexOnLoadStore = true;
+    private boolean displayWait = true;
+    private boolean clipSprites = true;
+    private boolean shiftUsesVx;
+    private boolean jumpUsesVx;
+    private boolean waitingForDisplay;
+    private double displayWaitElapsedTime;
 
     public Cpu(Memory memory, DisplayDriver displayDriver, KeyboardDriver keyboardDriver) {
         this.memory = memory;
@@ -65,6 +75,9 @@ public class Cpu {
 
         instructionElapsedTime = 0.0;
         timerElapsedTime = 0.0;
+        waitingForKey = false;
+        waitingForDisplay = false;
+        displayWaitElapsedTime = 0.0;
     }
 
     public void reset() {
@@ -78,7 +91,29 @@ public class Cpu {
         instructionElapsedTime = 0.0;
         timerElapsedTime = 0.0;
         waitingForKey = false;
+        waitingForDisplay = false;
+        displayWaitElapsedTime = 0.0;
         soundDriver.stop();
+    }
+
+    public void setQuirks(
+        boolean resetVfOnLogic,
+        boolean incrementIndexOnLoadStore,
+        boolean displayWait,
+        boolean clipSprites,
+        boolean shiftUsesVx,
+        boolean jumpUsesVx
+    ) {
+        this.resetVfOnLogic = resetVfOnLogic;
+        this.incrementIndexOnLoadStore = incrementIndexOnLoadStore;
+        this.displayWait = displayWait;
+        this.clipSprites = clipSprites;
+        this.shiftUsesVx = shiftUsesVx;
+        this.jumpUsesVx = jumpUsesVx;
+        if (!displayWait) {
+            waitingForDisplay = false;
+            displayWaitElapsedTime = 0.0;
+        }
     }
 
     public void loadSound() {
@@ -102,7 +137,13 @@ public class Cpu {
         instructionElapsedTime += deltaTime;
 
         while (instructionElapsedTime >= instructionPeriod) {
-            if (waitingForKey) {
+            if (waitingForDisplay) {
+                displayWaitElapsedTime += instructionPeriod;
+                if (displayWaitElapsedTime >= DISPLAY_REFRESH_PERIOD) {
+                    waitingForDisplay = false;
+                    displayWaitElapsedTime = 0.0;
+                }
+            } else if (waitingForKey) {
                 Byte keyPress = keyboardDriver.getKeyPressed();
                 if (keyPress != null) {
                     vRegister[waitingRegister] = keyPress;
@@ -189,14 +230,17 @@ public class Cpu {
                     case 0x1:
                         // OR Vx, Vy
                         vRegister[x] |= vRegister[y];
+                        if (resetVfOnLogic) vRegister[0xF] = 0;
                         break;
                     case 0x2:
                         // AND Vx, Vy
                         vRegister[x] &= vRegister[y];
+                        if (resetVfOnLogic) vRegister[0xF] = 0;
                         break;
                     case 0x3:
                         // XOR Vx, Vy
                         vRegister[x] ^= vRegister[y];
+                        if (resetVfOnLogic) vRegister[0xF] = 0;
                         break;
                     case 0x4:
                         // ADDC Vx, Vy
@@ -214,6 +258,7 @@ public class Cpu {
                         break;
                     case 0x6:
                         // SHR Vx
+                        vRegister[x] = vRegister[shiftUsesVx ? x : y];
                         byte flagShr = (byte) ((vRegister[x] & 0x01) == 1 ? 1 : 0);
                         vRegister[x] = (byte) ((vRegister[x] & 0xFF) >> 1);
                         vRegister[0xF] = flagShr;
@@ -227,6 +272,7 @@ public class Cpu {
                         break;
                     case 0xE:
                         // SHL Vx
+                        vRegister[x] = vRegister[shiftUsesVx ? x : y];
                         byte flagShl = (byte) ((vRegister[x] & 0x80) >> 7 == 1 ? 1 : 0);
                         vRegister[x] = (byte) (vRegister[x] << 1);
                         vRegister[0xF] = flagShl;
@@ -245,7 +291,7 @@ public class Cpu {
                 break;
             case 0xB:
                 // JP V0, nnn
-                programCounter = (short) (nnn + (vRegister[0] & 0xFF));
+                programCounter = (short) (nnn + (vRegister[jumpUsesVx ? x : 0] & 0xFF));
                 break;
             case 0xC:
                 // RND Vx, kk
@@ -255,6 +301,10 @@ public class Cpu {
             case 0xD:
                 // DRW Vx, Vy, k
                 drawSprite(x, y, k);
+                if (displayWait) {
+                    waitingForDisplay = true;
+                    displayWaitElapsedTime = 0.0;
+                }
                 break;
             case 0xE:
                 boolean skipIfPressed = (kk & 0xFF) == 0x9E; // SKP Vx
@@ -304,10 +354,16 @@ public class Cpu {
                     case 0x55:
                         // LD [I], Vx
                         saveRegisters2Mem(x);
+                        if (incrementIndexOnLoadStore) {
+                            indexRegister = (short) ((indexRegister & 0xFFFF) + (x & 0xFF) + 1);
+                        }
                         break;
                     case 0x65:
                         // LD Vx, [I]
                         loadMem2Registers(x);
+                        if (incrementIndexOnLoadStore) {
+                            indexRegister = (short) ((indexRegister & 0xFFFF) + (x & 0xFF) + 1);
+                        }
                         break;
                     default:
                         break;
@@ -321,14 +377,28 @@ public class Cpu {
     private void drawSprite(byte x, byte y, byte k) {
         short addr = indexRegister;
         byte flag = 0;
+        int startX = (vRegister[x] & 0xFF) % Chip8Constants.DISPLAY_WIDTH;
+        int startY = (vRegister[y] & 0xFF) % Chip8Constants.DISPLAY_HEIGHT;
+
         for (int rowIdx = 0; rowIdx < k; rowIdx++) {
             byte rowData = memory.getByte(addr);
+            int pixelY = startY + rowIdx;
+            if (clipSprites && pixelY >= Chip8Constants.DISPLAY_HEIGHT) {
+                addr++;
+                continue;
+            }
+
             for (int colIdx = 0; colIdx < Chip8Constants.SPRITE_WIDTH; colIdx++) {
-                boolean oldPixel = displayDriver.get((vRegister[x] & 0xFF) + colIdx, (vRegister[y] & 0xFF) + rowIdx);
+                int pixelX = startX + colIdx;
+                if (clipSprites && pixelX >= Chip8Constants.DISPLAY_WIDTH) {
+                    continue;
+                }
+
+                boolean oldPixel = displayDriver.get(pixelX, pixelY);
                 if (oldPixel && getBit(colIdx, rowData)) {
                     flag = 1;
                 }
-                displayDriver.set((vRegister[x] & 0xFF) + colIdx, (vRegister[y] & 0xFF) + rowIdx, oldPixel ^ getBit(colIdx, rowData));
+                displayDriver.set(pixelX, pixelY, oldPixel ^ getBit(colIdx, rowData));
             }
             addr++;
         }

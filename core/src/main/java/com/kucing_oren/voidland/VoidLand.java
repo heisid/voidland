@@ -39,7 +39,7 @@ public class VoidLand extends ApplicationAdapter {
     public void create() {
         settingsRepository = new SettingsRepository();
         settings = settingsRepository.load();
-        chip8.setKeyBindings(settings.chip8KeyBindings);
+        applyEmulatorSettings();
         Pixmap pixel = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixel.setColor(Color.WHITE);
         pixel.fill();
@@ -66,12 +66,24 @@ public class VoidLand extends ApplicationAdapter {
     public void saveSettings(AppSettings updatedSettings) {
         settingsRepository.save(updatedSettings);
         settings = updatedSettings;
-        chip8.setKeyBindings(settings.chip8KeyBindings);
+        applyEmulatorSettings();
         applyUiScale();
     }
 
     public AppSettings getSettings() {
         return settings;
+    }
+
+    private void applyEmulatorSettings() {
+        chip8.setKeyBindings(settings.chip8KeyBindings);
+        chip8.setQuirks(
+            settings.resetVfOnLogic,
+            settings.incrementIndexOnLoadStore,
+            settings.displayWait,
+            settings.clipSprites,
+            settings.shiftUsesVx,
+            settings.jumpUsesVx
+        );
     }
 
     public Skin getSkin() {
