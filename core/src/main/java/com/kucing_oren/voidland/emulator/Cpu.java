@@ -269,6 +269,10 @@ public class Cpu {
                         // LD [I], Vx
                         saveRegisters2Mem(x);
                         break;
+                    case 0x65:
+                        // LD Vx, [I]
+                        loadMem2Registers(x);
+                        break;
                     default:
                         break;
                 }
@@ -334,6 +338,14 @@ public class Cpu {
         int offset = 0;
         while (offset <= x) {
             memory.setByte((short) ((indexRegister & 0xFFFF) + offset), vRegister[offset]);
+            offset++;
+        }
+    }
+
+    public void loadMem2Registers(int x) {
+        int offset = 0;
+        while (offset <= x) {
+            vRegister[offset] = memory.getByte((short) ((indexRegister & 0xFFFF) + offset));
             offset++;
         }
     }
