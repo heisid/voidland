@@ -26,6 +26,11 @@ public class KeyboardDriver {
         keyMap.put(Input.Keys.X, 0x0);
         keyMap.put(Input.Keys.C, 0xB);
         keyMap.put(Input.Keys.V, 0xF);
+
+        // navigasi alternatif
+//        keyMap.put(Input.Keys.UP, 0xE);
+//        keyMap.put(Input.Keys.DOWN, 0xF);
+//        keyMap.put(Input.Keys.ENTER, 0xA);
     }
 
     public boolean iskeyPressed(byte key) {

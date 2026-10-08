@@ -42,7 +42,10 @@ public class Cpu {
     private byte delayTimer;
     private byte soundTimer;
 
+    private double instructionElapsedTime;
     private double timerElapsedTime;
+    private boolean waitingForKey;
+    private byte waitingRegister;
 
     public Cpu(Memory memory, DisplayDriver displayDriver, KeyboardDriver keyboardDriver) {
         this.memory = memory;
@@ -60,6 +63,7 @@ public class Cpu {
         delayTimer = 0;
         soundTimer = 0;
 
+        instructionElapsedTime = 0.0;
         timerElapsedTime = 0.0;
     }
 
@@ -71,7 +75,9 @@ public class Cpu {
         stackPointer = 0x0;
         delayTimer = 0;
         soundTimer = 0;
+        instructionElapsedTime = 0.0;
         timerElapsedTime = 0.0;
+        waitingForKey = false;
         soundDriver.stop();
     }
 
@@ -92,8 +98,23 @@ public class Cpu {
     }
 
     public void tick(float deltaTime) {
-        fetch();
-        execute();
+        double instructionPeriod = 1.0 / Chip8Constants.CPU_FREQUENCY_HZ;
+        instructionElapsedTime += deltaTime;
+
+        while (instructionElapsedTime >= instructionPeriod) {
+            if (waitingForKey) {
+                Byte keyPress = keyboardDriver.getKeyPressed();
+                if (keyPress != null) {
+                    vRegister[waitingRegister] = keyPress;
+                    waitingForKey = false;
+                }
+            } else {
+                fetch();
+                execute();
+            }
+            instructionElapsedTime -= instructionPeriod;
+        }
+
         updateTimers(deltaTime);
     }
 
@@ -251,7 +272,13 @@ public class Cpu {
                         break;
                     case 0x0A:
                         // LD Vx, K
-                        vRegister[x] = waitKeypress();
+                        Byte keyPress = keyboardDriver.getKeyPressed();
+                        if (keyPress == null) {
+                            waitingForKey = true;
+                            waitingRegister = x;
+                        } else {
+                            vRegister[x] = keyPress;
+                        }
                         break;
                     case 0x15:
                         // LD DT, Vx
@@ -306,14 +333,6 @@ public class Cpu {
             addr++;
         }
         vRegister[0xF] = flag;
-    }
-
-    private byte waitKeypress() {
-        Byte keyPress = null;
-        while (keyPress == null) {
-            keyPress = keyboardDriver.getKeyPressed();
-        }
-        return keyPress;
     }
 
     private void updateTimers(float deltaTime) {
