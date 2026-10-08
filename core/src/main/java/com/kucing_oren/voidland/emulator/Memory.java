@@ -26,4 +26,12 @@ public class Memory {
     public byte getByte(short address) {
         return content[address];
     }
+
+    public void setByte(short address, byte val) {
+        content[address] = val;
+    }
+
+    public void setByte(short address, int val) {
+        setByte(address, (byte)(val & 0xFF));
+    }
 }

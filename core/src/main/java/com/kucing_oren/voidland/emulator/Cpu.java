@@ -276,6 +276,10 @@ public class Cpu {
                         // LD F, Vx
                         indexRegister = getFontAddress(vRegister[x]);
                         break;
+                    case 0x33:
+                        // LD B, Vx
+                        saveBcd(vRegister[x]);
+                        break;
                     default:
                         break;
                 }
@@ -308,6 +312,16 @@ public class Cpu {
     private short getFontAddress(byte font) {
         int offset = (font & 0xFF) * 5; // 5 bytes each font
         return (short) (FONT_START_ADDR + offset);
+    }
+
+    private void saveBcd(int value) {
+        int val = value & 0xFF;
+        int hundreds = val / 100;
+        int tens = (val - hundreds * 100) / 10;
+        int units = val - hundreds * 100 - tens * 10;
+        memory.setByte(indexRegister, hundreds);
+        memory.setByte((short) (indexRegister + 1), tens);
+        memory.setByte((short) (indexRegister + 2), units);
     }
 
     private boolean getBit(int pos, byte byteVal) {
