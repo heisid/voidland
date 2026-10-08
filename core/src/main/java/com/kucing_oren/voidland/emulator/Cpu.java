@@ -40,6 +40,8 @@ public class Cpu {
     private byte delayTimer;
     private byte soundTimer;
 
+    private double timerElapsedTime;
+
     public Cpu(Memory memory, DisplayDriver displayDriver, KeyboardDriver keyboardDriver) {
         this.memory = memory;
         loadFont();
@@ -55,6 +57,8 @@ public class Cpu {
 
         delayTimer = 0;
         soundTimer = 0;
+
+        timerElapsedTime = 0.0;
     }
 
     public void reset() {
@@ -63,6 +67,10 @@ public class Cpu {
         indexRegister = 0;
         programCounter = Chip8Constants.PROGRAM_START_ADDRESS;
         stackPointer = 0x0;
+        delayTimer = 0;
+        soundTimer = 0;
+        timerElapsedTime = 0.0;
+        soundDriver.stop();
     }
 
     public void loadSound() {
@@ -81,10 +89,10 @@ public class Cpu {
         memory.load(fontByte, Chip8Constants.FONT_START_ADDRESS);
     }
 
-    public void tick() {
+    public void tick(float deltaTime) {
         fetch();
         execute();
-        updateTimers();
+        updateTimers(deltaTime);
     }
 
     private void fetch() {
@@ -307,14 +315,21 @@ public class Cpu {
         return keyPress;
     }
 
-    private void updateTimers() {
-        if ((delayTimer & 0xFF) > 0) {
-            delayTimer = (byte) ((delayTimer & 0xFF) - 1);
+    private void updateTimers(float deltaTime) {
+        double updatePeriod = 1.0 / Chip8Constants.TIMER_FREQUENCY_HZ;
+        timerElapsedTime += deltaTime;
+
+        while (timerElapsedTime >= updatePeriod) {
+            if ((delayTimer & 0xFF) > 0) {
+                delayTimer--;
+            }
+            if ((soundTimer & 0xFF) > 0) {
+                soundTimer--;
+            }
+            timerElapsedTime -= updatePeriod;
         }
-        if ((soundTimer & 0xFF) > 0) {
-            soundTimer = (byte) ((soundTimer & 0xFF) - 1);
-        }
-        if (soundTimer == 0) {
+
+        if ((soundTimer & 0xFF) == 0) {
             soundDriver.stop();
         }
     }

@@ -81,7 +81,7 @@ public class Chip8 {
     }
 
     public void cpuTick() {
-        cpu.tick();
+        cpu.tick(Gdx.graphics.getDeltaTime());
     }
 
     public void dispose() {
