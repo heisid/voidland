@@ -266,7 +266,9 @@ public class Cpu {
                         saveBcd(vRegister[x]);
                         break;
                     case 0x55:
-
+                        // LD [I], Vx
+                        saveRegisters2Mem(x);
+                        break;
                     default:
                         break;
                 }
@@ -326,6 +328,14 @@ public class Cpu {
         memory.setByte(indexRegister, hundreds);
         memory.setByte((short) (indexRegister + 1), tens);
         memory.setByte((short) (indexRegister + 2), units);
+    }
+
+    public void saveRegisters2Mem(int x) {
+        int offset = 0;
+        while (offset <= x) {
+            memory.setByte((short) ((indexRegister & 0xFFFF) + offset), vRegister[offset]);
+            offset++;
+        }
     }
 
     private boolean getBit(int pos, byte byteVal) {
