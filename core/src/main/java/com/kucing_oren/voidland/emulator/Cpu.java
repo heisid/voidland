@@ -36,6 +36,8 @@ public class Cpu {
         0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     };
 
+    private static final int FONT_START_ADDR = 0x50;
+
     private short opcode;
 
     private byte delayTimer;
@@ -70,7 +72,7 @@ public class Cpu {
         for (int i = 0; i < FONT.length; i++) {
             fontByte[i] = (byte) (FONT[i] & 0xFF);
         }
-        memory.load(fontByte, 0x50);
+        memory.load(fontByte, FONT_START_ADDR);
     }
 
     public void tick() {
@@ -259,7 +261,12 @@ public class Cpu {
                         if ((soundTimer & 0xFF) > 0) soundDriver.play();
                         break;
                     case 0x1E:
+                        // ADD I, Vx
                         indexRegister = (short) (indexRegister + (vRegister[x] & 0xFF));
+                        break;
+                    case 0x29:
+                        // LD F, Vx
+                        indexRegister = getFontAddress(vRegister[x]);
                         break;
                     default:
                         break;
@@ -288,6 +295,11 @@ public class Cpu {
         if (soundTimer == 0) {
             soundDriver.stop();
         }
+    }
+
+    private short getFontAddress(byte font) {
+        int offset = (font & 0xFF) * 5; // 5 bytes each font
+        return (short) (FONT_START_ADDR + offset);
     }
 
     private boolean getBit(int pos, byte byteVal) {
