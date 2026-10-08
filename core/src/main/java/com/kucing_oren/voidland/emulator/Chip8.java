@@ -8,12 +8,14 @@ import games.spooky.gdx.nativefilechooser.NativeFileChooserCallback;
 import games.spooky.gdx.nativefilechooser.NativeFileChooserConfiguration;
 
 import java.util.Locale;
+import java.util.function.Consumer;
 
 public class Chip8 {
     private Cpu cpu;
     private final Memory memory;
     private final DisplayDriver displayDriver;
     private final NativeFileChooser fileChooser;
+    private String loadedProgramName;
 
     public Chip8(NativeFileChooser fileChooser) {
         this.fileChooser = fileChooser;
@@ -22,7 +24,7 @@ public class Chip8 {
         cpu = new Cpu(memory, displayDriver);
     }
 
-    public void selectProgram() {
+    public void selectProgram(Consumer<String> onProgramLoaded) {
         NativeFileChooserConfiguration configuration = new NativeFileChooserConfiguration();
         configuration.title = "Select CHIP-8 program";
         configuration.directory = Gdx.files.absolute(System.getProperty("user.home"));
@@ -47,6 +49,8 @@ public class Chip8 {
                     memory.load(program, 0x200);
                     displayDriver.clear();
                     cpu.reset();
+                    loadedProgramName = file.name();
+                    onProgramLoaded.accept(loadedProgramName);
                 } catch (IllegalArgumentException e) {
                     Gdx.app.error("Chip8", "Failed to load program: " + file.path(), e);
                 }
@@ -60,6 +64,14 @@ public class Chip8 {
                 Gdx.app.error("Chip8", "Failed to select a program", exception);
             }
         });
+    }
+
+    public boolean hasLoadedProgram() {
+        return loadedProgramName != null;
+    }
+
+    public String getLoadedProgramName() {
+        return loadedProgramName;
     }
 
     public void cpuTick() {
