@@ -204,7 +204,7 @@ public class Cpu {
                         vRegister[x] = (byte) subtryx;
                         vRegister[0xF] = flagSubBorrowYx;
                         break;
-                    case 0x8:
+                    case 0xE:
                         // SHL Vx
                         byte flagShl = (byte) ((vRegister[x] & 0x80) >> 7 == 1 ? 1 : 0);
                         vRegister[x] = (byte) (vRegister[x] << 1);
@@ -264,7 +264,7 @@ public class Cpu {
                         break;
                     case 0x1E:
                         // ADD I, Vx
-                        indexRegister = (short) ((indexRegister & 0xFF) + (vRegister[x] & 0xFF));
+                        indexRegister = (short) ((indexRegister & 0xFFFF) + (vRegister[x] & 0xFF));
                         break;
                     case 0x29:
                         // LD F, Vx
