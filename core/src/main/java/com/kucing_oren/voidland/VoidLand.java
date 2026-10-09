@@ -14,10 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.kucing_oren.voidland.emulator.Chip8;
-import com.kucing_oren.voidland.screens.AboutScreen;
-import com.kucing_oren.voidland.screens.EmulatorScreen;
-import com.kucing_oren.voidland.screens.InitialScreen;
-import com.kucing_oren.voidland.screens.SettingsScreen;
+import com.kucing_oren.voidland.screens.*;
 import com.kucing_oren.voidland.settings.AppSettings;
 import com.kucing_oren.voidland.settings.SettingsRepository;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
@@ -64,6 +61,9 @@ public class VoidLand extends ApplicationAdapter {
         showScreen(new SettingsScreen(this, returnToMainScreen));
     }
 
+    public void showPreinstalledScreen() {
+        showScreen(new PreinstalledScreen(this, chip8));
+    }
     public void showAboutScreen() {
         showScreen(new AboutScreen(this));
     }

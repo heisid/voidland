@@ -17,6 +17,7 @@ public class InitialScreen extends AbstractMenuScreen {
             loadedProgram.setText("Loaded ROM: " + programName);
             updateStartButton(startEmulatorButton, true);
         }));
+        addButton("Preinstalled Games", application::showPreinstalledScreen);
         startEmulatorButton = addButton("Start Emulator", application::showMainScreen);
         updateStartButton(startEmulatorButton, chip8.hasLoadedProgram());
         addButton("Settings", () -> application.showSettingsScreen(false));

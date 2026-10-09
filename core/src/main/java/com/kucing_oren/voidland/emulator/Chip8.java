@@ -7,6 +7,8 @@ import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 import games.spooky.gdx.nativefilechooser.NativeFileChooserCallback;
 import games.spooky.gdx.nativefilechooser.NativeFileChooserConfiguration;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Locale;
 import java.util.function.Consumer;
 
@@ -88,6 +90,23 @@ public class Chip8 {
                 Gdx.app.error("Chip8", "Failed to select a program", exception);
             }
         });
+    }
+
+    public void loadProgramInternal(String fileName) {
+        String path = "/roms/" + fileName;
+        try (InputStream in = Chip8.class.getResourceAsStream(path)) {
+            if (in == null) {
+                throw new IOException("Resource not found: " + path);
+            }
+            program = in.readAllBytes();
+            memory.wipe();
+            memory.load(program, Chip8Constants.PROGRAM_START_ADDRESS);
+            displayDriver.clear();
+            cpu.reset();
+            loadedProgramName = fileName;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void restart() {
