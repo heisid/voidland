@@ -135,7 +135,7 @@ construo {
   jlink {
     guessModulesFromJar.set(false)
     // You may need to add more modules, as needed.
-    modules.addAll("java.base", "java.management", "java.desktop", "jdk.unsupported")
+    modules.addAll("java.base", "java.management", "java.desktop", "jdk.unsupported", "jdk.zipfs")
   }
 
   targets.configure {
